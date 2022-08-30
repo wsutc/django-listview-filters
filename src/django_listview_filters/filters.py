@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from django.contrib import messages
 
 from django.contrib.admin.utils import (
@@ -14,20 +16,15 @@ from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models
 from furl import furl
 
-# ListView settings
-ALL_VAR = "all"
-PAGE_VAR = "page"
-SEARCH_VAR = "search"
-ERROR_VAR = "error"
-
-IGNORED_PARAMS = (
+from ._helpers import get_setting
+from ._settings import (
     ALL_VAR,
     PAGE_VAR,
     SEARCH_VAR,
     ERROR_VAR,
+    IGNORED_PARAMS,
+    FILTER_PREFIX,
 )
-
-SHOW_ALL_LINK = False
 
 
 class ListViewFilter:
@@ -41,11 +38,20 @@ class ListViewFilter:
 
     def __init__(self, request, params, model):
         self.used_parameters = {}
-        self.show_all = self.show_all if SHOW_ALL_LINK in globals() else SHOW_ALL_LINK
-        # try:
-        #     self.show_unused_filters = settings.FILTER_SHOW_UNUSED_FILTERS
-        # except:
-        #     pass
+        self.show_all = get_setting("{}SHOW_ALL".format(FILTER_PREFIX), self.show_all)
+        self.show_unused_filters = get_setting(
+            "{}SHOW_UNUSED_FILTERS".format(FILTER_PREFIX), self.show_unused_filters
+        )
+
+        extra_ignored_params = get_setting(
+            "{}EXTRA_IGNORED_PARAMS".format(FILTER_PREFIX), None
+        )
+
+        self.ignored_params = IGNORED_PARAMS
+
+        if extra_ignored_params:
+            self.ignored_params += extra_ignored_params
+
         if self.title is None:
             raise ImproperlyConfigured(
                 "The list view filter '{}' does not specify a 'title'.".format(
@@ -212,7 +218,7 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
         return qs
 
     def choices(self, changelist):
-        if self.show_all:
+        if self.get_show_all:
             yield {
                 "selected": self.lookup_val is None and not self.lookup_val_isnull,
                 "query_string": changelist.get_query_string(
@@ -278,7 +284,7 @@ class ChoicesFieldListViewFilter(FieldListViewFilter):
         return qs
 
     def choices(self, changelist):
-        if self.show_all:
+        if self.get_show_all:
             yield {
                 "selected": self.lookup_val is None,
                 "query_string": changelist.get_query_string(
@@ -336,7 +342,7 @@ class AllValuesFieldListFilter(FieldListViewFilter):
         return [self.lookup_kwarg, self.lookup_kwarg_isnull]
 
     def choices(self, changelist):
-        if self.show_all:
+        if self.get_show_all:
             yield {
                 "selected": self.lookup_val is None and self.lookup_val_isnull is None,
                 "query_string": changelist.get_query_string(

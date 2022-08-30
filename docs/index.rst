@@ -10,6 +10,8 @@ Welcome to Django ListView Filters's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   settings
+
 Purpose
 =======
 
@@ -22,7 +24,7 @@ Installation
 
 ::
 
-   python -m pip install --no-deps -i https://test.pypi.org/simple/ django_listview_filters==0.0.1.dev0
+   python -m pip install --no-deps -i https://test.pypi.org/simple/ django_listview_filters==0.0.1.dev2
 
 Because this is pulling from TestPyPI, the dependencies may not match what was intended by the developer.
 
@@ -71,13 +73,14 @@ Class-based View
 
    from django.view.generic import ListView
 
-   from django-listview-filters import RelatedFieldListViewFilter
+   from django_listview_filters.filters import RelatedFieldListViewFilter
+   from django_listview_filters.mixins import FilterViewMixin
 
    class AuthorListView(ListView):
       context_object_name = "author"
       queryset = Author.objects.order_by("name")
 
-   class BookListView(ListView):
+   class BookListView(FilterViewMixin, ListView):
       context_object_name = "book"
       queryset = Author.objects.order_by("title")
 

@@ -1,12 +1,34 @@
+from django.db.models import Field
+
 from django.views.generic import View
 from django.views.generic.list import MultipleObjectMixin
 
+from django.contrib.admin.utils import get_fields_from_path
+
 from furl import furl
 
-from filters import FieldListViewFilter
+from ._helpers import get_setting
+from .filters import FieldListViewFilter
+from ._settings import (
+    FILTER_PREFIX,
+    ALL_VAR,
+    PAGE_VAR,
+    SEARCH_VAR,
+    ERROR_VAR,
+)
+
 
 class FilterViewMixin(MultipleObjectMixin, View):
+    def __init__(self) -> None:
+        self.all_var = get_setting("{}ALL_VAR".format(FILTER_PREFIX), ALL_VAR)
+        self.page_var = get_setting("{}PAGE_VAR".format(FILTER_PREFIX), PAGE_VAR)
+        self.search_var = get_setting("{}SEARCH_VAR".format(FILTER_PREFIX), SEARCH_VAR)
+        self.error_var = get_setting("{}ERROR_VAR".format(FILTER_PREFIX), ERROR_VAR)
+
+        return super().__init__()
+
     """Add filtering context"""
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -51,3 +73,126 @@ class FilterViewMixin(MultipleObjectMixin, View):
             context["clear_filter_fragment"] = new_fragment.path
 
         return context
+
+    def get_params(self, request):
+        fragment = furl(request.get_full_path())
+        new_fragment = fragment.copy()
+        if self.page_var in new_fragment.args:
+            del new_fragment.args[self.page_var]
+        if self.error_var in new_fragment.args:
+            del new_fragment.args[self.error_var]
+
+        return dict(new_fragment.args)
+
+    def filter_queryset(self, queryset):
+        self.params = self.get_params(self.request)
+        self.model = self.queryset.__getattribute__("model")
+
+        (
+            self.filter_specs,
+            self.has_filters,
+            remaining_lookup_params,
+            filters_may_have_duplicates,
+            self.has_active_filters,
+        ) = self.get_filters(self.request)
+
+        for filter_spec in self.filter_specs:
+            new_qs = filter_spec.queryset(self.request, queryset)
+            if new_qs is not None:
+                queryset = new_qs
+
+        return queryset
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        qs = self.filter_queryset(qs)
+
+        return qs
+
+    def get_filters_params(self, params: dict = None):
+        """Return all params except IGNORED_PARAMS."""
+        params = params or self.params
+        if not params:
+            return {}
+        lookup_params = params.copy()
+        for ignored in self.ignored_params:
+            if ignored in lookup_params:
+                del lookup_params[ignored]
+        return lookup_params
+
+    def get_filters(self, request):
+        lookup_params = self.get_filters_params()
+        may_have_duplicates = False
+        has_active_filters = False
+
+        filter_specs = []
+        for list_filter in self.list_filter:
+            lookup_params_count = len(lookup_params)
+            if callable(list_filter):
+                spec = list_filter(request, lookup_params, self.model)
+            else:
+                field_path = None
+                if isinstance(list_filter, (tuple, list)):
+                    field, field_list_filter_class = list_filter
+                else:
+                    # This is simply a field name, so use the default
+                    # FieldListFilter class that has been registered for the
+                    # type of the given field.
+                    field, field_list_filter_class = (
+                        list_filter,
+                        FieldListViewFilter.create,
+                    )
+                if not isinstance(field, Field):
+                    field_path = field
+                    field = get_fields_from_path(self.model, field_path)[-1]
+
+                spec = field_list_filter_class(
+                    field,
+                    request,
+                    lookup_params,
+                    self.model,
+                    field_path=field_path,
+                )
+                # field_list_filter_class removes any lookup_params it
+                # processes. If that happened, check if duplicates should be
+                # removed.
+                # if lookup_params_count > len(lookup_params):
+                #     may_have_duplicates |= lookup_spawns_duplicates(
+                #         self.lookup_opts,
+                #         field_path,
+                #     )
+            if spec and spec.has_output():
+                filter_specs.append(spec)
+                if lookup_params_count > len(lookup_params):
+                    has_active_filters = True
+
+        return (
+            filter_specs,
+            bool(filter_specs),
+            lookup_params,
+            may_have_duplicates,
+            has_active_filters,
+        )
+
+    def get_query_string(self, new_params: dict = None, remove: list = None):
+        if new_params is None:
+            new_params = {}
+        if remove is None:
+            remove = []
+        p = self.params.copy()
+
+        query = furl(args=p)
+
+        for r in remove:
+            for k in query.args:
+                if k.startswith(r):
+                    del query.args[k]
+        for k, v in new_params.items():
+            if v is None:
+                if k in query.args:
+                    del query.args[k]
+            else:
+                query.args[k] = v
+
+        return query
