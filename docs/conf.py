@@ -6,10 +6,12 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+from django_listview_filters.__about__ import __version__
+
 project = 'Django ListView Filters'
 copyright = '2022, Karl Wooster'
 author = 'Karl Wooster'
-release = '0.0.2.dev0'
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
