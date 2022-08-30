@@ -1,0 +1,27 @@
+[build-system]
+requires = [
+    "hatchling",
+    "furl",
+    "django",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-listview-filters"
+version = "0.0.1"
+authors = [
+    { name="Karl Wooster", email="karl.wooster@wsu.edu" },
+]
+description = "Add context to list views for sidebar links and modifying querysets with those links."
+readme = "README.md"
+license.file = "LICENSE"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/wsutc/django-listview-filters"
+"Bug Tracker" = "https://github.com/wsutc/django-listview-filters/issues"
