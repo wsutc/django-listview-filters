@@ -12,6 +12,10 @@ authors = [
 description = "Add context to list views for sidebar links and modifying querysets with those links."
 readme = "README.md"
 license.file = "LICENSE"
+dependencies = [
+    'django',
+    'furl',
+]
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
