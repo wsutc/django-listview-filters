@@ -15,6 +15,7 @@ from ._settings import (
     PAGE_VAR,
     SEARCH_VAR,
     ERROR_VAR,
+    IGNORED_PARAMS,
 )
 
 
@@ -24,6 +25,15 @@ class FilterViewMixin(MultipleObjectMixin, View):
         self.page_var = get_setting("{}PAGE_VAR".format(FILTER_PREFIX), PAGE_VAR)
         self.search_var = get_setting("{}SEARCH_VAR".format(FILTER_PREFIX), SEARCH_VAR)
         self.error_var = get_setting("{}ERROR_VAR".format(FILTER_PREFIX), ERROR_VAR)
+
+        extra_ignored_params = get_setting(
+            "{}EXTRA_IGNORED_PARAMS".format(FILTER_PREFIX), None
+        )
+
+        self.ignored_params = IGNORED_PARAMS
+
+        if extra_ignored_params:
+            self.ignored_params += extra_ignored_params
 
         return super().__init__()
 

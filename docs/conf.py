@@ -9,7 +9,7 @@
 project = "Django ListView Filters"
 copyright = "2022, Karl Wooster"
 author = "Karl Wooster"
-release = "0.0.1.dev2"
+release = "0.0.1.dev3"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

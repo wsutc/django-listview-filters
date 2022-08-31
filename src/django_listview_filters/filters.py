@@ -218,7 +218,7 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
         return qs
 
     def choices(self, changelist):
-        if self.get_show_all:
+        if self.show_all:
             yield {
                 "selected": self.lookup_val is None and not self.lookup_val_isnull,
                 "query_string": changelist.get_query_string(
@@ -284,7 +284,7 @@ class ChoicesFieldListViewFilter(FieldListViewFilter):
         return qs
 
     def choices(self, changelist):
-        if self.get_show_all:
+        if self.show_all:
             yield {
                 "selected": self.lookup_val is None,
                 "query_string": changelist.get_query_string(

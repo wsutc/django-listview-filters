@@ -1,6 +1,3 @@
-from curses import ERR
-
-
 FILTER_PREFIX = "FILTERVIEW_"
 ALL_VAR = "all"
 PAGE_VAR = "page"

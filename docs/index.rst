@@ -24,7 +24,7 @@ Installation
 
 ::
 
-   python -m pip install --no-deps -i https://test.pypi.org/simple/ django_listview_filters==0.0.1.dev2
+   python -m pip install --no-deps -i https://test.pypi.org/simple/ django_listview_filters==0.0.1.dev3
 
 Because this is pulling from TestPyPI, the dependencies may not match what was intended by the developer.
 
