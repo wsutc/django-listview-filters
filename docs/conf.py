@@ -4,7 +4,7 @@ import sys
 from django import setup as django_setup
 from django.conf import settings
 
-sys.path.insert(0, os.path.abspath('../src/django_listview_filters/'))
+sys.path.insert(0, os.path.abspath("../src/django_listview_filters/"))
 print("Path: {}".format(sys.path[0]))
 settings.configure()
 
