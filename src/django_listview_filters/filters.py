@@ -14,6 +14,9 @@ from django.contrib.admin.options import IncorrectLookupParameters
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 
 from django.db import models
+
+from django.db.models import Count
+
 from furl import furl
 
 from ._helpers import get_setting
@@ -200,24 +203,29 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
 
     def field_choices(self, field: models.Field, request):
         model = field.model
-        qs = field.get_choices(include_blank=False)
+        parent_model = field.related_model
+        p_qs = parent_model.objects.all()
 
         if not self.show_unused_filters:
             try:
-                qs_dict = dict(qs)
-                new_list = []
-                for value in qs_dict:
-                    kwargs = {field.name + "__pk": value}
-                    valid = model.objects.filter(**kwargs).exists()
-                    if valid:
-                        new_list.append((value, qs_dict[value]))
-                qs = new_list
+                matched_fields = (
+                    model.objects.order_by()
+                    .values_list(field.name, flat=True)
+                    .distinct()
+                )
+                qs = p_qs.filter(id__in=matched_fields)
+
+                qs = [(x.pk, str(x)) for x in qs]
             except Exception as err:
                 messages.warning(request, message=err)
 
         return qs
 
     def choices(self, changelist):
+        """Return dictionaries for each choice in a filter.
+
+        <changelist> is a ListView.
+        """
         if self.show_all:
             yield {
                 "selected": self.lookup_val is None and not self.lookup_val_isnull,

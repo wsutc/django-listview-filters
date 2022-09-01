@@ -64,10 +64,8 @@ class FilterViewMixin(MultipleObjectMixin, View):
             clear_filter_url = filter.clear_filter_string(self)
             if isinstance(filter, FieldListViewFilter):
                 choices = filter.choices(self)
-                print("Title: {}".format(filter.title))
                 choices_list = []
                 for counter, choice in enumerate(choices):
-                    print("Choice ({}): {}".format(counter, choice))
                     choices_list.append(choice)
                 filter_list.append((filter.title, choices_list, clear_filter_url))
 
@@ -190,14 +188,13 @@ class FilterViewMixin(MultipleObjectMixin, View):
             new_params = {}
         if remove is None:
             remove = []
-        p = self.params.copy()
 
-        query = furl(args=p)
+        query = furl(self.request.get_full_path())
 
         for r in remove:
-            for k in query.args:
-                if k.startswith(r):
-                    del query.args[k]
+            list = [k for k in query.args if k.startswith(r)]
+            for k in list:
+                del query.args[k]
         for k, v in new_params.items():
             if v is None:
                 if k in query.args:
