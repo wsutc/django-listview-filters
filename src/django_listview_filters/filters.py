@@ -382,3 +382,21 @@ class AllValuesFieldListFilter(FieldListViewFilter):
 
 
 FieldListViewFilter.register(lambda f: True, AllValuesFieldListFilter)
+
+
+class RelatedOnlyFieldListViewFilter(RelatedFieldListViewFilter):
+    def field_choices(self, field: models.Field, request):
+        return super().field_choices(field, request)
+
+
+class RelatedOnlyFieldListFilter(RelatedFieldListViewFilter):
+    def field_choices(self, field, request, model_admin):
+        pk_qs = (
+            model_admin.get_queryset(request)
+            .distinct()
+            .values_list("%s__pk" % self.field_path, flat=True)
+        )
+        ordering = self.field_admin_ordering(field, request, model_admin)
+        return field.get_choices(
+            include_blank=False, limit_choices_to={"pk__in": pk_qs}, ordering=ordering
+        )
