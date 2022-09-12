@@ -30,7 +30,7 @@ classifiers = [
 # [tool]
 # [tool.hatch]
 [tool.hatch.version]
-path="src/django_listview_filters/__about__.py"
+path="src/django_listview_filters/__init__.py"
 
 # [tool.hatch.build.targets.sdist]
 # exclude = [

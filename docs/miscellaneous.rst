@@ -10,5 +10,5 @@ get_settings
 
 A simple function that makes it easy to overwrite class (or other) variables with a Django project settings variable, if it exists.
 
-.. automodule:: _helpers
+.. automodule:: src.django_listview_filters._helpers
     :members:

@@ -11,6 +11,7 @@ Welcome to Django ListView Filters's documentation!
    :caption: Contents:
 
    settings
+   classes
    miscellaneous
 
 Purpose
@@ -23,9 +24,9 @@ This is largely a copy-paste of the source code for that modified to work outsid
 Installation
 ============
 
-::
+.. substitution-code-block:: console
 
-   python -m pip install --no-deps -i https://test.pypi.org/simple/ django_listview_filters==0.0.1b0.dev1
+   python -m pip install --no-deps -i https://test.pypi.org/simple/ django_listview_filters==|ProjectVersion|
 
 Because this is pulling from TestPyPI, the dependencies may not match what was intended by the developer.
 
@@ -37,12 +38,12 @@ A few customizations are added.
 Add 'Clear Filter' Context
 --------------------------
 
-Allow for replacing the 'All' link with a button that clears the parameter from the query.
+Adds :ref:`setting <show_all_setting>` for replacing the 'All' link with a button that clears the parameter from the query.
 
 Only List Lookups With Matches
 ------------------------------
 
-Allow for filtering of list for sidebar to only those with matches. That way empty links aren't taking up valuable space.
+Adds :ref:`setting <show_unused_setting>` for filtering of list for sidebar to only those with matches. That way empty links aren't taking up valuable space.
 
 Add Count to Context (Future)
 -----------------------------
@@ -52,10 +53,53 @@ Add the count of number of objects to each link that can be shown in the templat
 Configuration
 =============
 
+Basics
+------
+
+Filter choices should be sorted at the template or context level.
+
+*Example:*
+
+*In your class-based view:*
+
+.. code-block:: python
+
+   def get_context_data(self, **kwargs)
+      # super() is import for all of the other context gathering in FilterViewMixin
+      context = super().get_context_data(**kwargs)
+
+      # This matches the name defined in `list_filters` in the view definition.
+      filter_name = 'author'
+
+      # Method of FilterViewMixin
+      filter = self.get_filter_by_name(filter_name)
+
+      # Sort by lowercase of second object of tuples (display name)
+      filter.lookup_choices = sorted(filter.lookup_choices, key = lambda x: x[1].lower())
+
+      return context
+
+or in your template using the built-in `dictsort <https://docs.djangoproject.com/en/stable/ref/templates/builtins/#dictsort>`_ filter:
+
+.. code-block:: html+django
+
+   {% with filter_objects|dictsort:"display" as display_list %}
+      {% for item in display_list %}
+         <div class="row">
+            <a href="{{ item.query_string }}" class="col-auto nav-link link-dark py-0{% if item.selected %} active{% endif %}">
+               {{ item.display|truncatechars:20 }}
+            </a>
+         </div>
+      {% endfor %}
+   {% endwith %}
+
+Examples
+========
+
 Model
 -----
 
-::
+.. code-block:: python
 
    from django.db import models
 
@@ -70,7 +114,7 @@ Model
 Class-based View
 ----------------
 
-::
+.. code-block:: python
 
    from django.view.generic import ListView
 
@@ -92,7 +136,7 @@ Class-based View
 Template
 --------
 
-::
+.. code-block:: html+django
 
    {% for filter_name, filter_objects, clear_fragment in filter_list %}
       <div>

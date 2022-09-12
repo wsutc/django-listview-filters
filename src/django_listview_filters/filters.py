@@ -109,6 +109,7 @@ class ListViewFilter:
 
 
 class FieldListViewFilter(ListViewFilter):
+    """Filter for simple choice fields. Doesn't allow for multiple choice fields."""
     _field_list_filters = []
     _take_priority_index = 0
     list_separator = ","

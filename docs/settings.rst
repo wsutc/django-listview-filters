@@ -6,33 +6,57 @@ These are the settings that can be set in the Django project ``settings.py`` fil
 .. note::
     Defaults are shown.
 
+.. _show_all_setting:
+
 Set whether an ``All`` option is shown in list in sidebar.
 
-``FILTERVIEW_SHOW_ALL = True``
+.. code-block:: python
+
+    FILTERVIEW_SHOW_ALL = True
+
+.. _show_unused_setting:
 
 Set whether filters with no matches are shown in sidebar.
 
-``FILTERVIEW_SHOW_UNUSED_FILTERS = True``
+.. code-block:: python
+
+    FILTERVIEW_SHOW_UNUSED_FILTERS = True
+
+.. _page_var_setting:
 
 Set parameter in URL for page.
 
-``FILTERVIEW_PAGE_VAR = 'page'``
+.. code-block:: python
+    
+    FILTERVIEW_PAGE_VAR = 'page'
+
+.. _search_var_setting:
 
 Set parameter in URL for search.
 
-``FILTERVIEW_SEARCH_VAR = 'search'``
+.. code-block:: python
+
+    FILTERVIEW_SEARCH_VAR = 'search'
+
+.. _error_var_setting:
 
 Set parameter in URL for errors.
 
-``FILTERVIEW_ERROR_VAR = 'error'``
+.. code-block:: python
+
+    FILTERVIEW_ERROR_VAR = 'error'
+
+.. _extra_ignored_params_setting:
 
 Add extra parameters to be ignored by filtering as a list.
 
-``FILTERVIEW_EXTRA_IGNORED_PARAMS = None``
+.. code-block:: python
+
+    FILTERVIEW_EXTRA_IGNORED_PARAMS = None
 
 *Example:*
 
-::
+.. code-block:: python
 
     FILTERVIEW_EXTRA_IGNORED_PARAMS = [
         'foo',
