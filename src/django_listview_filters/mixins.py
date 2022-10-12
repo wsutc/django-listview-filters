@@ -8,7 +8,7 @@ from django.contrib.admin.utils import get_fields_from_path
 from furl import furl
 
 from ._helpers import get_setting
-from .filters import FieldListViewFilter
+from .filters import FieldListViewFilter, ListViewFilter
 from ._settings import (
     FILTER_PREFIX,
     ALL_VAR,
@@ -203,3 +203,18 @@ class FilterViewMixin(MultipleObjectMixin, View):
                 query.args[k] = v
 
         return query
+
+    def get_filter_by_name(self, filter_name:str) -> ListViewFilter:
+        """Return filter matching `filter_name`
+        
+        :param filter_name: name of filter
+        :type filter_name: str
+        :return: Filter that matches filter_name
+        :rtype: ListViewFilter, None if no match found"""
+        if len(self.filter_specs) > 0:
+            for filter_spec in self.filter_spec:
+                filter = filter_spec if filter_spec.field_path == filter_name else None
+        else:
+            filter = None
+
+        return filter
