@@ -26,9 +26,7 @@ Installation
 
 .. substitution-code-block:: console
 
-   python -m pip install --no-deps -i https://test.pypi.org/simple/ django_listview_filters==|ProjectVersion|
-
-Because this is pulling from TestPyPI, the dependencies may not match what was intended by the developer.
+   python -m pip install django_listview_filters==|ProjectVersion|
 
 Additional Functionality
 ========================
