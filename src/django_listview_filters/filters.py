@@ -1,38 +1,31 @@
 # from django.conf import settings
 
 from django.contrib import messages
-
-from django.contrib.admin.utils import (
-    get_model_from_relation,
-    get_fields_from_path,
-    prepare_lookup_value,
-    reverse_field_path,
-    lookup_spawns_duplicates,
-)
 from django.contrib.admin.options import IncorrectLookupParameters
 
+# get_fields_from_path,; lookup_spawns_duplicates,
+from django.contrib.admin.utils import (
+    get_model_from_relation,
+    prepare_lookup_value,
+    reverse_field_path,
+)
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-
 from django.db import models
-
-from django.db.models import Count
-
 from furl import furl
 
 from ._helpers import get_setting
-from ._settings import (
-    ALL_VAR,
-    PAGE_VAR,
-    SEARCH_VAR,
-    ERROR_VAR,
-    IGNORED_PARAMS,
+from ._settings import (  # ALL_VAR,; PAGE_VAR,; SEARCH_VAR,; ERROR_VAR,
     FILTER_PREFIX,
+    IGNORED_PARAMS,
 )
+
+# from django.db.models import Count
 
 
 class ListViewFilter:
     """
-    Base class for list view filters. Must create subclasses to provide specific functionality.
+    Base class for list view filters. Must create subclasses to provide specific
+    functionality.
     """
 
     title = None  # Human-readable title to appear in the right sidebar.
@@ -90,7 +83,8 @@ class ListViewFilter:
         request's query string and that will be used by this filter.
         """
         raise NotImplementedError(
-            "Subclasses of ListViewFilter must provide an 'expected_parameters()' method."
+            "Subclasses of ListViewFilter must provide an 'expected_parameters()' \
+                method."
         )
 
     def clear_filter_string(self, view):
@@ -110,6 +104,7 @@ class ListViewFilter:
 
 class FieldListViewFilter(ListViewFilter):
     """Filter for simple choice fields. Doesn't allow for multiple choice fields."""
+
     _field_list_filters = []
     _take_priority_index = 0
     list_separator = ","
@@ -124,7 +119,8 @@ class FieldListViewFilter(ListViewFilter):
                 value = params.pop(p)
                 self.used_parameters[p] = prepare_lookup_value(
                     p,
-                    value,  # , self.list_separator ### added in a future version of Django as an optional parameter
+                    value,
+                    # , self.list_separator ### added in a future version of Django
                 )
 
     def has_output(self):
@@ -286,7 +282,7 @@ class ChoicesFieldListViewFilter(FieldListViewFilter):
                     if valid:
                         new_list.append((value, qs_dict[value]))
                 qs = new_list
-            except Exception as err:
+            except Exception:
                 raise
                 # messages.warning(self.request, message=err)
 
