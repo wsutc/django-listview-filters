@@ -1,5 +1,7 @@
 # Django ListView Filters
 
+[![Documentation Status](https://readthedocs.org/projects/django-listview-filters/badge/?version=latest)](https://django-listview-filters.readthedocs.io/en/latest/?badge=latest)
+
 Add context to list views for sidebar links and modifying querysets with those links.
 
 ## Purpose
