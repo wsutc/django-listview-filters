@@ -1,3 +1,5 @@
+> **Warning**: This GitHub repo is being archived. See the new repo on [GitLab](https://git.tricity.wsu.edu/karl.wooster/django-listview-filters)
+
 # Django ListView Filters
 
 [![Documentation Status](https://readthedocs.org/projects/django-listview-filters/badge/?version=latest)](https://django-listview-filters.readthedocs.io/en/latest/?badge=latest)
