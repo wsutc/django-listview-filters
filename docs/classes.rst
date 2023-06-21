@@ -18,6 +18,7 @@ Simple Foreign Key Filter
 
 .. automodule:: src.django_listview_filters.filters
     :members: RelatedFieldListViewFilter
+    :noindex:
 
 
 Dump (please ignore)

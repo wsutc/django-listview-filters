@@ -1,5 +1,3 @@
-# from django.conf import settings
-
 from django.contrib import messages
 from django.contrib.admin.options import IncorrectLookupParameters
 
@@ -34,13 +32,15 @@ class ListViewFilter:
 
     def __init__(self, request, params, model):
         self.used_parameters = {}
-        self.show_all = get_setting("{}SHOW_ALL".format(FILTER_PREFIX), self.show_all)
+        self.show_all = get_setting(f"{FILTER_PREFIX}SHOW_ALL", self.show_all)
         self.show_unused_filters = get_setting(
-            "{}SHOW_UNUSED_FILTERS".format(FILTER_PREFIX), self.show_unused_filters
+            f"{FILTER_PREFIX}SHOW_UNUSED_FILTERS",
+            self.show_unused_filters,
         )
 
         extra_ignored_params = get_setting(
-            "{}EXTRA_IGNORED_PARAMS".format(FILTER_PREFIX), None
+            f"{FILTER_PREFIX}EXTRA_IGNORED_PARAMS",
+            None,
         )
 
         self.ignored_params = IGNORED_PARAMS
@@ -51,14 +51,14 @@ class ListViewFilter:
         if self.title is None:
             raise ImproperlyConfigured(
                 "The list view filter '{}' does not specify a 'title'.".format(
-                    self.__class__.__name__
-                )
+                    self.__class__.__name__,
+                ),
             )
 
     def has_output(self):
         """Return True if some choices would be output for this filter."""
         raise NotImplementedError(
-            "Subclasses of ListViewFilter must provide a 'has_output()' method."
+            "Subclasses of ListViewFilter must provide a 'has_output()' method.",
         )
 
     def choices(self, changelist):
@@ -68,13 +68,13 @@ class ListViewFilter:
         'changelist' is the ChangeList to be displayed.
         """
         raise NotImplementedError(
-            "Subclasses of ListViewFilter must provide a 'choices()' method."
+            "Subclasses of ListViewFilter must provide a 'choices()' method.",
         )
 
     def queryset(self, request, queryset):
         """Return the filtered queryset."""
         raise NotImplementedError(
-            "Subclasses of ListViewFilter must provide a 'queryset()' method."
+            "Subclasses of ListViewFilter must provide a 'queryset()' method.",
         )
 
     def expected_parameters(self):
@@ -84,7 +84,7 @@ class ListViewFilter:
         """
         raise NotImplementedError(
             "Subclasses of ListViewFilter must provide an 'expected_parameters()' \
-                method."
+                method.",
         )
 
     def clear_filter_string(self, view):
@@ -130,13 +130,14 @@ class FieldListViewFilter(ListViewFilter):
         try:
             return queryset.filter(**self.used_parameters)
         except (ValueError, ValidationError) as err:
-            raise IncorrectLookupParameters(err)
+            raise IncorrectLookupParameters(err) from err
 
     @classmethod
     def register(cls, test, list_filter_class, take_priority=False):
         if take_priority:
             cls._field_list_filters.insert(
-                cls._take_priority_index, (test, list_filter_class)
+                cls._take_priority_index,
+                (test, list_filter_class),
             )
             cls._field_list_filters.append((test, list_filter_class))
 
@@ -145,7 +146,11 @@ class FieldListViewFilter(ListViewFilter):
         for test, list_filter_class in cls._field_list_filters:
             if test(field):
                 return list_filter_class(
-                    field, request, params, model, field_path=field_path
+                    field,
+                    request,
+                    params,
+                    model,
+                    field_path=field_path,
                 )
 
 
@@ -158,7 +163,7 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
 
     def __init__(self, field, request, params, model, field_path):
         other_model = get_model_from_relation(field)
-        self.lookup_kwarg = "%s__%s__exact" % (field_path, field.target_field.name)
+        self.lookup_kwarg = f"{field_path}__{field.target_field.name}__exact"
         self.lookup_kwarg_isnull = "%s__isnull" % field_path
         self.lookup_val = params.get(self.lookup_kwarg)
         self.lookup_val_isnull = params.get(self.lookup_kwarg_isnull)
@@ -180,10 +185,7 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
         return self.field.null or (self.field.is_relation and self.field.many_to_many)
 
     def has_output(self):
-        if self.include_empty_choice:
-            extra = 1
-        else:
-            extra = 0
+        extra = 1 if self.include_empty_choice else 0
         return len(self.lookup_choices) + extra > 1
 
     def expected_parameters(self):
@@ -227,7 +229,7 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
             yield {
                 "selected": self.lookup_val is None and not self.lookup_val_isnull,
                 "query_string": changelist.get_query_string(
-                    remove=[self.lookup_kwarg, self.lookup_kwarg_isnull]
+                    remove=[self.lookup_kwarg, self.lookup_kwarg_isnull],
                 ),
                 "display": "All",
             }
@@ -235,7 +237,8 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
             yield {
                 "selected": self.lookup_val == str(pk_val),
                 "query_string": changelist.get_query_string(
-                    {self.lookup_kwarg: pk_val}, [self.lookup_kwarg_isnull]
+                    {self.lookup_kwarg: pk_val},
+                    [self.lookup_kwarg_isnull],
                 ),
                 "display": val,
             }
@@ -243,7 +246,8 @@ class RelatedFieldListViewFilter(FieldListViewFilter):
             yield {
                 "selected": bool(self.lookup_val_isnull),
                 "query_string": changelist.get_query_string(
-                    {self.lookup_kwarg_isnull: "True"}, [self.lookup_kwarg]
+                    {self.lookup_kwarg_isnull: "True"},
+                    [self.lookup_kwarg],
                 ),
                 "display": self.empty_value_display,
             }
@@ -293,7 +297,7 @@ class ChoicesFieldListViewFilter(FieldListViewFilter):
             yield {
                 "selected": self.lookup_val is None,
                 "query_string": changelist.get_query_string(
-                    remove=[self.lookup_kwarg, self.lookup_kwarg_isnull]
+                    remove=[self.lookup_kwarg, self.lookup_kwarg_isnull],
                 ),
                 "display": "All",
             }
@@ -305,7 +309,8 @@ class ChoicesFieldListViewFilter(FieldListViewFilter):
             yield {
                 "selected": str(lookup) == self.lookup_val,
                 "query_string": changelist.get_query_string(
-                    {self.lookup_kwarg: lookup}, [self.lookup_kwarg_isnull]
+                    {self.lookup_kwarg: lookup},
+                    [self.lookup_kwarg_isnull],
                 ),
                 "display": title,
             }
@@ -313,7 +318,8 @@ class ChoicesFieldListViewFilter(FieldListViewFilter):
             yield {
                 "selected": bool(self.lookup_val_isnull),
                 "query_string": changelist.get_query_string(
-                    {self.lookup_kwarg_isnull: "True"}, [self.lookup_kwarg]
+                    {self.lookup_kwarg_isnull: "True"},
+                    [self.lookup_kwarg],
                 ),
                 "display": none_title,
             }
@@ -351,7 +357,7 @@ class AllValuesFieldListFilter(FieldListViewFilter):
             yield {
                 "selected": self.lookup_val is None and self.lookup_val_isnull is None,
                 "query_string": changelist.get_query_string(
-                    remove=[self.lookup_kwarg, self.lookup_kwarg_isnull]
+                    remove=[self.lookup_kwarg, self.lookup_kwarg_isnull],
                 ),
                 "display": "All",
             }
@@ -364,7 +370,8 @@ class AllValuesFieldListFilter(FieldListViewFilter):
             yield {
                 "selected": self.lookup_val == val,
                 "query_string": changelist.get_query_string(
-                    {self.lookup_kwarg: val}, [self.lookup_kwarg_isnull]
+                    {self.lookup_kwarg: val},
+                    [self.lookup_kwarg_isnull],
                 ),
                 "display": val,
             }
@@ -372,7 +379,8 @@ class AllValuesFieldListFilter(FieldListViewFilter):
             yield {
                 "selected": bool(self.lookup_val_isnull),
                 "query_string": changelist.get_query_string(
-                    {self.lookup_kwarg_isnull: "True"}, [self.lookup_kwarg]
+                    {self.lookup_kwarg_isnull: "True"},
+                    [self.lookup_kwarg],
                 ),
                 "display": self.empty_value_display,
             }

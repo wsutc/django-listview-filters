@@ -1,18 +1,20 @@
-import os
+import logging
 import sys
+from pathlib import Path  # , PurePath
 
 from django import setup as django_setup
 from django.conf import settings
+from django_listview_filters.__init__ import __version__
 
+# from sphinx.util import logging
 
+logger = logging.getLogger(__name__)
 
-# import __init__
-# from __init__ import __version__
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 
-sys.path.insert(0, os.path.abspath("../"))
-print("Path: {}".format(sys.path[0]))
+sys.path.insert(0, str(Path("../").resolve()))
 
-from src.django_listview_filters.__init__ import __version__
+logger.debug(f"Full path: {sys.path}")
 
 settings.configure()
 
@@ -27,11 +29,11 @@ django_setup()
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Django ListView Filters"
-copyright = "2022, Karl Wooster"
+copyright = "2023, Karl Wooster"
 author = "Karl Wooster"
 # release = "0.0.1b0.dev1"
 version = __version__
-print("Version: {}".format(version))
+print(f"Version: {version}")
 release = version
 
 # rst_epilog = """
@@ -39,7 +41,7 @@ release = version
 # """.format(version = version)
 
 substitutions = [
-    ('|ProjectVersion|', version),
+    ("|ProjectVersion|", version),
 ]
 
 # -- General configuration ---------------------------------------------------
@@ -47,7 +49,7 @@ substitutions = [
 
 extensions = [
     "sphinx.ext.autodoc",
-    "docs.custom-extensions.extensions",
+    "docs.custom_extensions.extensions",
     "sphinx.ext.autosectionlabel",
 ]
 
@@ -61,4 +63,4 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "alabaster"
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
